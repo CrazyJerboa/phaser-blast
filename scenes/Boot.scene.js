@@ -12,7 +12,7 @@ export default class BootScene extends Phaser.Scene {
         super('BootScene');
         
         this.tiles = [];
-        this.tilesList = [];
+        this.selectedTilesList = [];
     }
 
     preload() {
@@ -29,8 +29,6 @@ export default class BootScene extends Phaser.Scene {
         const ths = this;
         
         for (let i = 0; i < rows; i++) {
-            const row = [];
-            
             for (let j = 0; j < cols; j++) {
                 const color = COLORS[Math.floor(Math.random() * COLORS.length)];
                 const x = j * RECT_SIZE + RECT_SIZE / 2;
@@ -49,21 +47,19 @@ export default class BootScene extends Phaser.Scene {
                 Phaser.Display.Align.In.Center(text, tile);
 
                 lastId++;
-                row.push(tileData);
+
+                this.tiles.push(tileData);
                 
                 tile.on('pointerup', function() {
-                    ths.tilesList = [];
+                    ths.selectedTilesList = [];
                     tileData.isChecked = false;
                     ths.getTileNeighbours(tileData);
-                    console.log(ths.tilesList)
                     
-                    if (ths.tilesList.length > 1) {
+                    if (ths.selectedTilesList.length > 1) {
                         ths.destroySelectedTiles();
                     }
                 })
             }
-            
-            this.tiles.push(row);
         }
     }
     
@@ -71,49 +67,45 @@ export default class BootScene extends Phaser.Scene {
         clickedTile.isChecked = true;
         
         if (depth === 0) {
-            this.tilesList.push(clickedTile);
+            this.selectedTilesList.push(clickedTile);
         }
 
         const _pushTileToArray = (tile) => {
             if (
                 tile && 
                 clickedTile.color === tile.color && 
-                !this.tilesList.filter(t => t.id === tile.id).length
+                !this.selectedTilesList.filter(t => t.id === tile.id).length
             ) {
                 tile.isChecked = false;
-                this.tilesList.push(tile);
+                this.selectedTilesList.push(tile);
             }
         }
 
         if (clickedTile.col + 1 < COLS) {
             const tile = this.tiles
-                .find((_, index) => index === clickedTile.row)
-                .find(t => t.col === clickedTile.col + 1);
+                .find(t => t.row === clickedTile.row && t.col === clickedTile.col + 1);
             _pushTileToArray(tile);
         }
         
         if (clickedTile.col - 1 >= 0) {
             const tile = this.tiles
-                .find((_, index) => index === clickedTile.row)
-                .find(t => t.col === clickedTile.col - 1);
+                .find(t => t.row === clickedTile.row && t.col === clickedTile.col - 1);
             _pushTileToArray(tile);
         }
 
         if (clickedTile.row + 1 < ROWS) {
             const tile = this.tiles
-                .find((_, index) => index === clickedTile.row + 1)
-                .find(t => t.col === clickedTile.col);
+                .find(t => t.row === clickedTile.row + 1 && t.col === clickedTile.col);
             _pushTileToArray(tile);
         }
 
         if (clickedTile.row - 1 >= 0) {
             const tile = this.tiles
-                .find((_, index) => index === clickedTile.row - 1)
-                .find(t => t.col === clickedTile.col);
+                .find(t => t.row === clickedTile.row - 1 && t.col === clickedTile.col);
             _pushTileToArray(tile);
         }
 
-        this.tilesList.forEach(tile => {
+        this.selectedTilesList.forEach(tile => {
             if (!tile.isChecked) {
                 this.getTileNeighbours(tile, depth + 1);
             }
@@ -122,8 +114,7 @@ export default class BootScene extends Phaser.Scene {
     
     destroySelectedTiles() {
         const figuresList = this.scene.scene.children.list;
-        const tilesIdArray = this.tilesList.map(t => t.id);
-        console.log(this.scene.scene.children.list)
+        const tilesIdArray = this.selectedTilesList.map(t => t.id);
         
         tilesIdArray.forEach(tileId => {
             const figure = figuresList.find(f => f.name === 'rect_' + tileId);
