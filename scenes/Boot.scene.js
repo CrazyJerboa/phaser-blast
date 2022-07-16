@@ -36,9 +36,18 @@ export default class BootScene extends Phaser.Scene {
                 const x = j * RECT_SIZE + RECT_SIZE / 2;
                 const y = i * RECT_SIZE + RECT_SIZE / 2;
                 
-                const tile = this.add.rectangle(x, y, RECT_SIZE, RECT_SIZE, color).setInteractive();
+                const tile = this.add
+                    .rectangle(x, y, RECT_SIZE, RECT_SIZE, color)
+                    .setInteractive()
+                    .setName('rect_' + lastId);
                 const tileData = { id: lastId, x, y, color, row: i, col: j };
-                
+
+                const text = this.add
+                    .text(0, 0, lastId + '\n' + i + 'x' + j)
+                    .setFill('#797979')
+                    .setName('text_' + lastId);
+                Phaser.Display.Align.In.Center(text, tile);
+
                 lastId++;
                 row.push(tileData);
                 
@@ -47,6 +56,10 @@ export default class BootScene extends Phaser.Scene {
                     tileData.isChecked = false;
                     ths.getTileNeighbours(tileData);
                     console.log(ths.tilesList)
+                    
+                    if (ths.tilesList.length > 1) {
+                        ths.destroySelectedTiles();
+                    }
                 })
             }
             
@@ -104,6 +117,20 @@ export default class BootScene extends Phaser.Scene {
             if (!tile.isChecked) {
                 this.getTileNeighbours(tile, depth + 1);
             }
+        });
+    }
+    
+    destroySelectedTiles() {
+        const figuresList = this.scene.scene.children.list;
+        const tilesIdArray = this.tilesList.map(t => t.id);
+        console.log(this.scene.scene.children.list)
+        
+        tilesIdArray.forEach(tileId => {
+            const figure = figuresList.find(f => f.name === 'rect_' + tileId);
+            const text = figuresList.find(t => t.name === 'text_' + tileId);
+            
+            figure.destroy();
+            text.destroy();
         });
     }
 }
