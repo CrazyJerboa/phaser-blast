@@ -37,7 +37,11 @@ export default class BootScene extends Phaser.Scene {
                 const tile = this.add
                     .rectangle(x, y, RECT_SIZE, RECT_SIZE, color)
                     .setInteractive()
-                    .setName('rect_' + lastId);
+                    .setName('rect_' + lastId)
+                    .setData('id', lastId)
+                    .setData('color', color)
+                    .setData('row', i)
+                    .setData('col', j)
                 const tileData = { id: lastId, x, y, color, row: i, col: j };
 
                 const text = this.add
@@ -48,12 +52,10 @@ export default class BootScene extends Phaser.Scene {
 
                 lastId++;
 
-                this.tiles.push(tileData);
-                
                 tile.on('pointerup', function() {
                     ths.selectedTilesList = [];
                     tileData.isChecked = false;
-                    ths.getTileNeighbours(tileData);
+                    ths.getTileNeighbours(tile);
                     
                     if (ths.selectedTilesList.length > 1) {
                         ths.destroySelectedTiles();
@@ -64,61 +66,76 @@ export default class BootScene extends Phaser.Scene {
     }
     
     getTileNeighbours(clickedTile, depth = 0) {
-        clickedTile.isChecked = true;
+        const figuresList = this.scene.scene.children.list;
+        
+        clickedTile.setData('isChecked', true);
         
         if (depth === 0) {
-            this.selectedTilesList.push(clickedTile);
+            this.selectedTilesList.push(clickedTile.getData('id'));
         }
 
         const _pushTileToArray = (tile) => {
             if (
                 tile && 
-                clickedTile.color === tile.color && 
-                !this.selectedTilesList.filter(t => t.id === tile.id).length
+                clickedTile.getData('color') === tile.getData('color') && 
+                !this.selectedTilesList.filter(id => id === tile.getData('id')).length
             ) {
-                tile.isChecked = false;
-                this.selectedTilesList.push(tile);
+                tile.setData('isChecked', false);
+                this.selectedTilesList.push(tile.getData('id'));
             }
         }
 
-        if (clickedTile.col + 1 < COLS) {
-            const tile = this.tiles
-                .find(t => t.row === clickedTile.row && t.col === clickedTile.col + 1);
+        if (clickedTile.getData('col') + 1 < COLS) {
+            const tile = figuresList
+                .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') + 1);
             _pushTileToArray(tile);
         }
         
-        if (clickedTile.col - 1 >= 0) {
-            const tile = this.tiles
-                .find(t => t.row === clickedTile.row && t.col === clickedTile.col - 1);
+        if (clickedTile.getData('col') - 1 >= 0) {
+            const tile = figuresList
+                .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') - 1);
             _pushTileToArray(tile);
         }
 
-        if (clickedTile.row + 1 < ROWS) {
-            const tile = this.tiles
-                .find(t => t.row === clickedTile.row + 1 && t.col === clickedTile.col);
+        if (clickedTile.getData('row') + 1 < ROWS) {
+            const tile = figuresList
+                .find(t => t.getData('row') === clickedTile.getData('row') + 1 && t.getData('col') === clickedTile.getData('col'));
             _pushTileToArray(tile);
         }
 
-        if (clickedTile.row - 1 >= 0) {
-            const tile = this.tiles
-                .find(t => t.row === clickedTile.row - 1 && t.col === clickedTile.col);
+        if (clickedTile.getData('row') - 1 >= 0) {
+            const tile = figuresList
+                .find(t => t.getData('row') === clickedTile.getData('row') - 1 && t.getData('col') === clickedTile.getData('col'));
             _pushTileToArray(tile);
         }
 
-        this.selectedTilesList.forEach(tile => {
-            if (!tile.isChecked) {
+        this.selectedTilesList.forEach(id => {
+            const tile = this.children.getByName('rect_' + id);
+            
+            if (!tile.getData('isChecked')) {
                 this.getTileNeighbours(tile, depth + 1);
             }
         });
     }
     
     destroySelectedTiles() {
-        const figuresList = this.scene.scene.children.list;
-        const tilesIdArray = this.selectedTilesList.map(t => t.id);
+        const deletedRowsArray = [];
+        const deletedColsArray = [];
         
-        tilesIdArray.forEach(tileId => {
-            const figure = figuresList.find(f => f.name === 'rect_' + tileId);
-            const text = figuresList.find(t => t.name === 'text_' + tileId);
+        const figuresList = this.scene.scene.children.list;
+        
+        const tilesIdArray = this.selectedTilesList.map(id => {
+            const tile = this.children.getByName('rect_' + id);
+            
+            if (!deletedRowsArray.includes(tile.getData('row'))) deletedRowsArray.push(tile.getData('row'));
+            if (!deletedColsArray.includes(tile.getData('col'))) deletedColsArray.push(tile.getData('col'));
+            
+            return tile.getData('id');
+        });
+        
+        tilesIdArray.forEach(id => {
+            const figure = figuresList.find(f => f.getData('id') === id);
+            const text = figuresList.find(t => t.name === 'text_' + id);
             
             figure.destroy();
             text.destroy();
