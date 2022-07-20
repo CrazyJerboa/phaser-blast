@@ -26,41 +26,9 @@ export default class BootScene extends Phaser.Scene {
     }
     
     generateSheet(rows, cols) {
-        const ths = this;
-        
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-                const x = j * RECT_SIZE + RECT_SIZE / 2;
-                const y = i * RECT_SIZE + RECT_SIZE / 2;
-                
-                const tile = this.add
-                    .rectangle(x, y, RECT_SIZE, RECT_SIZE, color)
-                    .setInteractive()
-                    .setName('rect_' + lastId)
-                    .setData('id', lastId)
-                    .setData('color', color)
-                    .setData('row', i)
-                    .setData('col', j)
-                const tileData = { id: lastId, x, y, color, row: i, col: j };
-
-                const text = this.add
-                    .text(0, 0, lastId + '\n' + i + 'x' + j)
-                    .setFill('#797979')
-                    .setName('text_' + lastId);
-                Phaser.Display.Align.In.Center(text, tile);
-
-                lastId++;
-
-                tile.on('pointerup', function() {
-                    ths.selectedTilesList = [];
-                    tileData.isChecked = false;
-                    ths.getTileNeighbours(tile);
-                    
-                    if (ths.selectedTilesList.length > 1) {
-                        ths.destroySelectedTiles();
-                    }
-                })
+               this.createNewTile(j, i);
             }
         }
     }
@@ -143,7 +111,6 @@ export default class BootScene extends Phaser.Scene {
             let [col, selectedRows] = entry;
             const lastRow = Math.max.apply(null, selectedRows);
             const rows = [];
-            let offset = 1;
             
             col = parseInt(col);
 
@@ -161,6 +128,7 @@ export default class BootScene extends Phaser.Scene {
                 text.y += RECT_SIZE * offset;
             }
 
+            let offset = 1;
             rows.forEach(row => {
                 if (row - 1 >= 0) {
                     const aboveTile = figuresList.find(t => t.getData('col') === col && t.getData('row') === row - 1);
@@ -171,7 +139,44 @@ export default class BootScene extends Phaser.Scene {
                         offset++;
                     }
                 }
-            })
+            });
+            
+            for (let i = 0; i < offset; i++) {
+                this.createNewTile(col, i);
+            }
+        });
+    }
+    
+    createNewTile(col, row) {
+        const x = col * RECT_SIZE + RECT_SIZE / 2;
+        const y = row * RECT_SIZE + RECT_SIZE / 2;
+        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        
+        const tile = this.add
+            .rectangle(x, y, RECT_SIZE, RECT_SIZE, color)
+            .setInteractive()
+            .setName('rect_' + lastId)
+            .setData('id', lastId)
+            .setData('color', color)
+            .setData('row', row)
+            .setData('col', col);
+
+        const text = this.add
+            .text(0, 0, lastId + '\n' + row + 'x' + col)
+            .setFill('#797979')
+            .setName('text_' + lastId);
+        Phaser.Display.Align.In.Center(text, tile);
+
+        lastId++;
+        
+        const ths = this;
+        tile.on('pointerup', function() {
+            ths.selectedTilesList = [];
+            ths.getTileNeighbours(tile);
+
+            if (ths.selectedTilesList.length > 1) {
+                ths.destroySelectedTiles();
+            }
         });
     }
 }
