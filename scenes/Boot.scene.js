@@ -119,26 +119,59 @@ export default class BootScene extends Phaser.Scene {
     }
     
     destroySelectedTiles() {
-        const deletedRowsArray = [];
-        const deletedColsArray = [];
+        const deletedTiles = {};
+
+        this.selectedTilesList.forEach(id => {
+            const tile = this.children.getByName('rect_' + id);
+
+            const row = tile.getData('row');
+            const col = tile.getData('col');
+            
+            if (!deletedTiles[col]) {
+                deletedTiles[col] = [row];
+            } else if (!deletedTiles[col].includes(row)) {
+                deletedTiles[col].push(row);
+            }
+            
+            tile.destroy();
+            this.children.getByName('text_' + id).destroy();
+        });
         
         const figuresList = this.scene.scene.children.list;
         
-        const tilesIdArray = this.selectedTilesList.map(id => {
-            const tile = this.children.getByName('rect_' + id);
+        Object.entries(deletedTiles).forEach(entry => {
+            let [col, selectedRows] = entry;
+            const lastRow = Math.max.apply(null, selectedRows);
+            const rows = [];
+            let offset = 1;
             
-            if (!deletedRowsArray.includes(tile.getData('row'))) deletedRowsArray.push(tile.getData('row'));
-            if (!deletedColsArray.includes(tile.getData('col'))) deletedColsArray.push(tile.getData('col'));
-            
-            return tile.getData('id');
-        });
-        
-        tilesIdArray.forEach(id => {
-            const figure = figuresList.find(f => f.getData('id') === id);
-            const text = figuresList.find(t => t.name === 'text_' + id);
-            
-            figure.destroy();
-            text.destroy();
+            col = parseInt(col);
+
+            for (let i = lastRow; i >= 0; i--) {
+                rows.push(i);
+            }
+
+            const _moveTile = (tile, offset) => {
+                const id = tile.getData('id');
+                const currentRow = tile.getData('row');
+                tile.setData('row', currentRow + offset);
+                tile.y += RECT_SIZE * offset;
+
+                const text = this.children.getByName('text_' + id);
+                text.y += RECT_SIZE * offset;
+            }
+
+            rows.forEach(row => {
+                if (row - 1 >= 0) {
+                    const aboveTile = figuresList.find(t => t.getData('col') === col && t.getData('row') === row - 1);
+                    
+                    if (aboveTile) {
+                        _moveTile(aboveTile, offset);
+                    } else {
+                        offset++;
+                    }
+                }
+            })
         });
     }
 }
