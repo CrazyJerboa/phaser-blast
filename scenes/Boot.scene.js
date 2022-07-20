@@ -32,6 +32,10 @@ export default class BootScene extends Phaser.Scene {
             }
         }
     }
+
+    onSheetChanged() {
+        
+    }
     
     getTileNeighbours(clickedTile, depth = 0) {
         const figuresList = this.scene.scene.children.list;
@@ -145,6 +149,8 @@ export default class BootScene extends Phaser.Scene {
                 this.createNewTile(col, i);
             }
         });
+
+        this.checkAvailableTurns();
     }
     
     createNewTile(col, row) {
@@ -157,6 +163,7 @@ export default class BootScene extends Phaser.Scene {
             .setInteractive()
             .setName('rect_' + lastId)
             .setData('id', lastId)
+            .setData('type', 'tile')
             .setData('color', color)
             .setData('row', row)
             .setData('col', col);
@@ -178,5 +185,65 @@ export default class BootScene extends Phaser.Scene {
                 ths.destroySelectedTiles();
             }
         });
+    }
+
+    checkAvailableTurns() {
+        let canTurn = false;
+
+        const figuresList = this.scene.scene.children.list.filter(child => child.getData('type') === 'tile');
+
+        for (let i = 0; i < figuresList.length; i++) {
+            const tile = figuresList[i];
+            
+            if (tile.getData('col') + 1 < COLS) {
+                const neighboringTile = figuresList
+                    .find(t => 
+                        t.getData('row') === tile.getData('row') 
+                        && t.getData('col') === tile.getData('col') + 1
+                        && t.getData('color') === tile.getData('color')
+                    );
+                if (neighboringTile) canTurn = true;
+            }
+            
+            if (tile.getData('col') - 1 >= 0) {
+                const neighboringTile = figuresList
+                    .find(t => 
+                        t.getData('row') === tile.getData('row') 
+                        && t.getData('col') === tile.getData('col') - 1
+                        && t.getData('color') === tile.getData('color')
+                    );
+                if (neighboringTile) canTurn = true;
+            }
+
+            if (tile.getData('row') + 1 < ROWS) {
+                const neighboringTile = figuresList
+                    .find(t => 
+                        t.getData('row') === tile.getData('row') + 1 
+                        && t.getData('col') === tile.getData('col')
+                        && t.getData('color') === tile.getData('color')
+                    );
+                if (neighboringTile) canTurn = true;
+            }
+
+            if (tile.getData('row') - 1 >= 0) {
+                const neighboringTile = figuresList
+                    .find(t => 
+                        t.getData('row') === tile.getData('row') - 1 
+                        && t.getData('col') === tile.getData('col')
+                        && t.getData('color') === tile.getData('color')
+                    );
+                if (neighboringTile) canTurn = true;
+            }
+            
+            if (canTurn) break;
+        }
+
+        if (!canTurn) {
+            this.gameOver('noTurnsAvailable')
+        }
+    }
+
+    gameOver(reason) {
+        console.log(reason)
     }
 }
