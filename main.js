@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import BootScene from "./scenes/Boot.scene";
 import MainScene from "./scenes/Main.scene";
+import GameOverScene from "./scenes/GameOver.scene";
 
 const config = {
     name: 'app',
@@ -17,7 +18,8 @@ const config = {
     },
     scene: [
         BootScene,
-        MainScene
+        MainScene,
+        GameOverScene
     ]
 };
 

@@ -275,30 +275,12 @@ export default class MainScene extends Phaser.Scene {
         }
     }
     gameOver(reason) {
-        const screenWidth = this.game.scale.gameSize.width;
-        const screenHeight = this.game.scale.gameSize.height;
-
-        console.log(reason)
-        switch (reason) {
-            case gameOverReasons.turnsAreOver:
-                this.add.text(screenWidth / 2, screenHeight / 2, 'Game Over');
-                this.add.text(screenWidth / 2, screenHeight / 2 + 20, 'You have run out of turns', {align: 'center'});
-                break;
-
-            case gameOverReasons.noTurnsAvailable:
-                this.add.text(screenWidth / 2, screenHeight / 2, 'Game Over');
-                this.add.text(screenWidth / 2, screenHeight / 2 + 20, 'No any turns available', {align: 'center'});
-                break;
-
-            case gameOverReasons.youWon:
-                this.add.text(screenWidth / 2, screenHeight / 2, 'You Won!');
-                this.add.text(screenWidth / 2, screenHeight / 2 + 20, 'Collected scores: ' + this.scores, {align: 'center'});
-                break;
-
-            default:
-                this.add.text(screenWidth / 2, screenHeight / 2, 'Game Over');
-                break;
-        }
+        this.scene.launch('GameOverScene', {
+            screenWidth: this.game.scale.gameSize.width,
+            screenHeight: this.game.scale.gameSize.height,
+            scores: this.scores,
+            reason,
+        });
 
         this.scene.pause();
     }
