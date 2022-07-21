@@ -18,6 +18,7 @@ export default class MainScene extends Phaser.Scene {
         this.turns = 10;
         this.scoresToWin = 40;
         this.selectedTilesList = [];
+        this.isAnimationActive = false;
     }
     
     create() {
@@ -69,14 +70,17 @@ export default class MainScene extends Phaser.Scene {
 
         const ths = this;
         tile.on('pointerup', () => {
-            ths.selectedTilesList = [];
-            ths.getTileNeighbours(tile);
-
-            if (ths.selectedTilesList.length > 1) {
-                ths.turns--;
-                ths.updateTurnText();
-
-                ths.destroySelectedTiles();
+            if (!ths.isAnimationActive) {
+                ths.selectedTilesList = [];
+                ths.getTileNeighbours(tile);
+    
+                if (ths.selectedTilesList.length > 1) {
+                    ths.isAnimationActive = true;
+                    ths.turns--;
+                    ths.updateTurnText();
+    
+                    ths.destroySelectedTiles();
+                }
             }
         });
     }
@@ -180,8 +184,11 @@ export default class MainScene extends Phaser.Scene {
                     targets: tile,
                     y: tile.y + this.tileSize * offset,
                     duration: 1000,
-                    ease: 'Bounce',
-                });
+                    ease: 'Bounce'
+                })
+                    .on('complete', () => {
+                        this.isAnimationActive = false;
+                    });
             }
 
             let offset = 1;
@@ -205,6 +212,12 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.checkAvailableTurns();
+        
+        setTimeout(() => {
+            if (this.isAnimationActive) {
+                this.isAnimationActive = false;
+            }
+        }, 1100);
     }
 
     checkAvailableTurns() {
@@ -275,14 +288,14 @@ export default class MainScene extends Phaser.Scene {
         }
     }
     gameOver(reason) {
+        this.scene.setActive(false);
+        
         this.scene.launch('GameOverScene', {
             screenWidth: this.game.scale.gameSize.width,
             screenHeight: this.game.scale.gameSize.height,
             scores: this.scores,
             reason,
         });
-
-        this.scene.pause();
     }
 
     addMainField() {
