@@ -21,7 +21,16 @@ export default class MainScene extends Phaser.Scene {
         this.isAnimationActive = false;
     }
     
-    create() {
+    create(data) {
+        if (data?.isClearData) {
+            this.lastId = 1;
+            this.tiles = null;
+            this.scores = 0;
+            this.turns = 10;
+            this.selectedTilesList = [];
+            this.isAnimationActive = false;
+        }
+        
         this.addMainField();
         this.addScoresField();
         
