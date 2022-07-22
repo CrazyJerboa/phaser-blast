@@ -123,7 +123,7 @@ export default class GameOverScene extends Phaser.Scene {
                 this.buttonText.y += 2;
             })
             .on('pointerup', () => {
-                this.scene.pause().setVisible(false);
+                this.scene.stop();
                 this.scene.launch('MainScene', {isClearData: true});
 
                 this.button.y -= 2;
