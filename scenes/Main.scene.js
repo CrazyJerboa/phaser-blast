@@ -428,13 +428,13 @@ export default class MainScene extends Phaser.Scene {
     }
 
     initBonusScores() {
-        const x = 600;
+        const x = 610;
         const y = 35;
         
         const bg = this.add.image(x, y, buttons.main)
             .setScale(0.2);
         
-        this.add.image(x + 8 - bg.width * 0.2 / 2, y, coin.main)
+        this.add.image(x + 8 - bg.width * 0.2 / 2, y - 1, coin.main)
             .setScale(1.3);
         
         this.bonusScoresText = this.add

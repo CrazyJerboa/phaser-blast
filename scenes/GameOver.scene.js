@@ -7,6 +7,8 @@ export default class GameOverScene extends Phaser.Scene {
         super('GameOverScene');
 
         this.data = null;
+        this.button = null;
+        this.buttonText = null;
     }
     
     init(data) {
@@ -84,7 +86,7 @@ export default class GameOverScene extends Phaser.Scene {
                     'You Won!',
                     {
                         fontFamily: 'Marvin',
-                        fontSize: 30
+                        fontSize: 50
                     }
                 )
                     .setOrigin(0.5);
@@ -109,19 +111,32 @@ export default class GameOverScene extends Phaser.Scene {
     }
     
     initReloadButton() {
-        const button = this.add.image(
+        this.button = this.add.image(
             this.data.screenWidth / 2,
             this.data.screenHeight - 120,
             buttons.danger
         )
             .setInteractive()
             .setScale(0.7)
+            .on('pointerdown', () => {
+                this.button.y += 2;
+                this.buttonText.y += 2;
+            })
             .on('pointerup', () => {
                 this.scene.launch('MainScene', {isClearData: true});
                 this.scene.setVisible(false);
+
+                this.button.y -= 2;
+                this.buttonText.y -= 2;
+            })
+            .on('pointerover', () => {
+                this.button.setTint(0xff00ff, 0xffff00, 0x0000ff, 0xff0000);
+            })
+            .on('pointerout', () => {
+                this.button.clearTint();
             });
         
-        const text = this.add.text(
+        this.buttonText = this.add.text(
             this.data.screenWidth / 2,
             this.data.screenHeight - 120,
             'New game',
@@ -132,6 +147,6 @@ export default class GameOverScene extends Phaser.Scene {
         )
             .setOrigin(0.5);
 
-        Phaser.Display.Align.In.Center(text, button);
+        Phaser.Display.Align.In.Center(this.buttonText, this.button);
     }
 }
