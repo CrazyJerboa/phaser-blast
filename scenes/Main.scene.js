@@ -6,6 +6,7 @@ import {gameOverReasons} from "../enum/gameOverReasons";
 import ButtonBonus from "../classes/ButtonBonus.class";
 import {buttons} from "../enum/buttons";
 import {coin} from "../enum/coin";
+import Progress from "../classes/Progress.class";
 
 export default class MainScene extends Phaser.Scene {
     constructor() {
@@ -18,6 +19,7 @@ export default class MainScene extends Phaser.Scene {
         this.cols = 6;
         this.tiles = null;
         this.bonusBombButton = null;
+        this.progressBar = null;
         this.scores = 0;
         this.bonusScores = 10;
         this.bonusCurrentPrice = 0;
@@ -43,6 +45,8 @@ export default class MainScene extends Phaser.Scene {
         this.addScoresField();
         
         this.generateSheet(this.rows, this.cols);
+        
+        this.initProgressBar();
         
         this.initBonusScores();
         this.initBonusButtons();
@@ -199,6 +203,7 @@ export default class MainScene extends Phaser.Scene {
 
         this.scores += this.selectedTilesList.length;
         this.updateScoresText();
+        this.updateProgressBar();
 
         this.selectedTilesList.forEach(id => {
             const tile = this.tiles
@@ -428,8 +433,8 @@ export default class MainScene extends Phaser.Scene {
     }
 
     initBonusScores() {
-        const x = 610;
-        const y = 35;
+        const x = 702;
+        const y = 30;
         
         const bg = this.add.image(x, y, buttons.main)
             .setScale(0.2);
@@ -475,6 +480,14 @@ export default class MainScene extends Phaser.Scene {
                 this.isBonusBombActive = false;
                 this.bonusBombButton.untintButton();
             }
-        })
+        });
+    }
+
+    initProgressBar() {
+        this.progressBar = new Progress(this, this.game.config.width / 2, -45);
+    }
+    
+    updateProgressBar() {
+        this.progressBar.updateWidth();
     }
 }

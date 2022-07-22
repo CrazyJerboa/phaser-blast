@@ -1,4 +1,5 @@
 export const fields = {
     main: 'fieldMain',
-    scores: 'fieldScores'
+    scores: 'fieldScores',
+    progress: 'fieldProgress'
 }
