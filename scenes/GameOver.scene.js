@@ -123,8 +123,8 @@ export default class GameOverScene extends Phaser.Scene {
                 this.buttonText.y += 2;
             })
             .on('pointerup', () => {
+                this.scene.pause().setVisible(false);
                 this.scene.launch('MainScene', {isClearData: true});
-                this.scene.setVisible(false);
 
                 this.button.y -= 2;
                 this.buttonText.y -= 2;
@@ -136,16 +136,10 @@ export default class GameOverScene extends Phaser.Scene {
                 this.button.clearTint();
             });
         
-        this.buttonText = this.add.text(
-            this.data.screenWidth / 2,
-            this.data.screenHeight - 120,
-            'New game',
-            {
-                fontFamily: 'Marvin',
-                fontSize: 30
-            }
-        )
-            .setOrigin(0.5);
+        this.buttonText = this.add.text(0, 0, 'New game', {
+            fontFamily: 'Marvin',
+            fontSize: 30
+        }).setOrigin(0.5);
 
         Phaser.Display.Align.In.Center(this.buttonText, this.button);
     }
