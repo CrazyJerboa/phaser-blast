@@ -1,3 +1,5 @@
 export const buttons = {
-    danger: 'buttonDanger'
+    main: 'buttonMain',
+    danger: 'buttonDanger',
+    bonus: 'buttonBonus'
 }

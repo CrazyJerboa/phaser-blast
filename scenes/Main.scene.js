@@ -3,6 +3,9 @@ import {getRandomTileColor} from "../helpers/getRandomTileColor";
 import Tile from "../classes/Tile.class";
 import {fields} from "../enum/fields";
 import {gameOverReasons} from "../enum/gameOverReasons";
+import ButtonBonus from "../classes/ButtonBonus.class";
+import {buttons} from "../enum/buttons";
+import {coin} from "../enum/coin";
 
 export default class MainScene extends Phaser.Scene {
     constructor() {
@@ -14,11 +17,16 @@ export default class MainScene extends Phaser.Scene {
         this.rows = 8;
         this.cols = 6;
         this.tiles = null;
+        this.bonusBombButton = null;
         this.scores = 0;
+        this.bonusScores = 10;
+        this.bonusCurrentPrice = 0;
         this.turns = 10;
         this.scoresToWin = 40;
         this.selectedTilesList = [];
         this.isAnimationActive = false;
+        
+        this.isBonusBombActive = false;
     }
     
     create(data) {
@@ -35,6 +43,9 @@ export default class MainScene extends Phaser.Scene {
         this.addScoresField();
         
         this.generateSheet(this.rows, this.cols);
+        
+        this.initBonusScores();
+        this.initBonusButtons();
     }
 
     generateSheet(rows, cols) {
@@ -81,12 +92,16 @@ export default class MainScene extends Phaser.Scene {
         tile.on('pointerup', () => {
             if (!ths.isAnimationActive) {
                 ths.selectedTilesList = [];
+                
                 ths.getTileNeighbours(tile);
     
                 if (ths.selectedTilesList.length > 1) {
                     ths.isAnimationActive = true;
-                    ths.turns--;
-                    ths.updateTurnText();
+                    
+                    if (!this.isBonusBombActive) {
+                        ths.turns--;
+                        ths.updateTurnText();
+                    }
     
                     ths.destroySelectedTiles();
                 }
@@ -102,6 +117,32 @@ export default class MainScene extends Phaser.Scene {
         if (depth === 0) {
             this.selectedTilesList.push(clickedTile.getData('id'));
         }
+        
+        const _getTilesForBombBonus = () => {
+            const row = clickedTile.getData('row');
+            const col = clickedTile.getData('col');
+
+            figuresList.forEach(t => {
+                const targetRow = t.getData('row');
+                const targetCol = t.getData('col');
+                const id = t.getData('id');
+                
+                if (
+                    targetRow >= row - 1 && targetRow <= row + 1
+                    && targetCol >= col - 1 && targetCol <= col + 1
+                    && !this.selectedTilesList.includes(id)
+                ) {
+                    this.selectedTilesList.push(id);
+                }
+            });
+
+            this.bonusScores -= this.bonusCurrentPrice;
+            this.updateBonusScoresText();
+            
+            this.bonusCurrentPrice = 0;
+            this.bonusBombButton.untintButton();
+            this.isBonusBombActive = false;
+        }
 
         const _pushTileToArray = (tile) => {
             if (
@@ -114,39 +155,43 @@ export default class MainScene extends Phaser.Scene {
             }
         }
 
-        if (clickedTile.getData('col') + 1 < this.cols) {
-            const tile = figuresList
-                .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') + 1);
-            _pushTileToArray(tile);
-        }
-
-        if (clickedTile.getData('col') - 1 >= 0) {
-            const tile = figuresList
-                .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') - 1);
-            _pushTileToArray(tile);
-        }
-
-        if (clickedTile.getData('row') + 1 < this.rows) {
-            const tile = figuresList
-                .find(t => t.getData('row') === clickedTile.getData('row') + 1 && t.getData('col') === clickedTile.getData('col'));
-            _pushTileToArray(tile);
-        }
-
-        if (clickedTile.getData('row') - 1 >= 0) {
-            const tile = figuresList
-                .find(t => t.getData('row') === clickedTile.getData('row') - 1 && t.getData('col') === clickedTile.getData('col'));
-            _pushTileToArray(tile);
-        }
-
-        this.selectedTilesList.forEach(id => {
-            const tile = this.tiles
-                .getChildren()
-                .find(t => t.getData('id') === id);
-            
-            if (!tile.getData('isChecked')) {
-                this.getTileNeighbours(tile, depth + 1);
+        if (this.isBonusBombActive) {
+            _getTilesForBombBonus();
+        } else {
+            if (clickedTile.getData('col') + 1 < this.cols) {
+                const tile = figuresList
+                    .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') + 1);
+                _pushTileToArray(tile);
             }
-        });
+    
+            if (clickedTile.getData('col') - 1 >= 0) {
+                const tile = figuresList
+                    .find(t => t.getData('row') === clickedTile.getData('row') && t.getData('col') === clickedTile.getData('col') - 1);
+                _pushTileToArray(tile);
+            }
+    
+            if (clickedTile.getData('row') + 1 < this.rows) {
+                const tile = figuresList
+                    .find(t => t.getData('row') === clickedTile.getData('row') + 1 && t.getData('col') === clickedTile.getData('col'));
+                _pushTileToArray(tile);
+            }
+    
+            if (clickedTile.getData('row') - 1 >= 0) {
+                const tile = figuresList
+                    .find(t => t.getData('row') === clickedTile.getData('row') - 1 && t.getData('col') === clickedTile.getData('col'));
+                _pushTileToArray(tile);
+            }
+    
+            this.selectedTilesList.forEach(id => {
+                const tile = this.tiles
+                    .getChildren()
+                    .find(t => t.getData('id') === id);
+                
+                if (!tile.getData('isChecked')) {
+                    this.getTileNeighbours(tile, depth + 1);
+                }
+            });
+        }
     }
 
     destroySelectedTiles() {
@@ -156,7 +201,6 @@ export default class MainScene extends Phaser.Scene {
         this.updateScoresText();
 
         this.selectedTilesList.forEach(id => {
-            // const tile = this.children.getByName('tile_' + id).tile;
             const tile = this.tiles
                 .getChildren()
                 .find(t => t.getData('id') === id);
@@ -383,11 +427,54 @@ export default class MainScene extends Phaser.Scene {
             .setOrigin(0.5);
     }
 
+    initBonusScores() {
+        const x = 600;
+        const y = 35;
+        
+        const bg = this.add.image(x, y, buttons.main)
+            .setScale(0.2);
+        
+        this.add.image(x + 8 - bg.width * 0.2 / 2, y, coin.main)
+            .setScale(1.3);
+        
+        this.bonusScoresText = this.add
+            .text(x + 7, y - 3, this.bonusScores, {
+                fontFamily: 'Marvin',
+                fontSize: 20
+            })
+            .setOrigin(0.5, 0.5);
+    }
+
     updateTurnText() {
         this.turnsText.setText(this.turns);
     }
 
     updateScoresText() {
         this.scoresText.setText(this.scores);
+    }
+
+    updateBonusScoresText() {
+        this.bonusScoresText.setText(this.bonusScores);
+    }
+    
+    initBonusButtons() {
+        const price = 5;
+        
+        this.bonusBombButton = new ButtonBonus(this, 608, 450, {
+            nameText: 'Bomb',
+            price
+        });
+        
+        this.bonusBombButton.button.on('pointerup', () => {
+            if (this.bonusScores >= price && !this.isBonusBombActive) {
+                this.isBonusBombActive = true;
+                this.bonusCurrentPrice = price;
+
+                this.bonusBombButton.tintButton();
+            } else {
+                this.isBonusBombActive = false;
+                this.bonusBombButton.untintButton();
+            }
+        })
     }
 }
