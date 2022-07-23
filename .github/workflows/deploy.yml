@@ -9,28 +9,28 @@ jobs:
   gh-pages-deploy:
     name: Deploying to gh-pages
     runs-on: ubuntu-latest # or macos-latest/windows-latest
-    
     steps:
       - name: Setup Node.js for use with actions
         uses: actions/setup-node@v1.1.0
         with:
           version: 16.8 # see https://github.com/actions/setup-node#supported-version-syntax for supported versions
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
           
       - name: Checkout branch
         uses: actions/checkout@v2
-        with:
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
           
       - name: Clean install dependencies
         run: npm ci # or yarn install --frozen-lockfile for yarn
         # if the above doesn't work, use npm i or yarn
-        with:
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
       - name: Build app
         run: npm run build
-        with:
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
           
       - name: deploy
@@ -38,4 +38,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
