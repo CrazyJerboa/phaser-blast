@@ -1,5 +1,4 @@
 # Project exclude paths
 /node_modules/
 /.idea/
-/webpack.config.js
 /build/
