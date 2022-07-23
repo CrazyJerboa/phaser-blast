@@ -1,0 +1,7 @@
+
+@font-face {
+    font-family: 'Marvin';
+    src: url('./Marvin.woff2') format("woff2"),
+    url('./Marvin.ttf') format("opentype");
+    font-weight: 400;
+}
