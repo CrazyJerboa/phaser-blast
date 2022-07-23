@@ -8,7 +8,7 @@ module.exports = {
     entry: './main.js',
     output: {
         filename: 'main.js',
-        path: path.resolve(__dirname, 'build/dist'),
+        path: path.resolve(__dirname, 'dist'),
     },
     module: {
         rules: [
@@ -46,7 +46,7 @@ module.exports = {
             patterns: [
                 {
                     from: path.resolve(__dirname, './assets'),
-                    to: path.resolve(__dirname, './build/dist/assets'),
+                    to: path.resolve(__dirname, './dist/assets'),
                 }
             ]
         }),
