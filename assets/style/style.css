@@ -1,0 +1,12 @@
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+canvas {
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    margin: auto;
+}

@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "npx webpack serve --config ./webpack.config.dev.js"
+    "start": "npx webpack serve --config ./webpack.config.dev.js",
+    "build": "npx webpack"
   },
   "author": "Aleksei Gubov <alexey.gubov@gmail.com>",
   "license": "ISC",
