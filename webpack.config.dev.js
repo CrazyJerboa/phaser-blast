@@ -40,7 +40,7 @@ module.exports = {
     devtool: 'inline-source-map',
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Squire Story',
+            title: 'Phaser Blast',
             template: path.resolve(__dirname, 'index.html'),
         }),
         new CopyWebpackPlugin({
