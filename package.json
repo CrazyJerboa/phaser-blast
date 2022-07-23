@@ -5,11 +5,13 @@
   "main": "main.js",
   "scripts": {
     "start": "npx webpack serve --config ./webpack.config.dev.js",
-    "build": "npx webpack"
+    "build": "npx webpack",
+    "deploy": "gh-pages -d dist"
   },
   "author": "Aleksei Gubov <alexey.gubov@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "gh-pages": "^4.0.0",
     "phaser": "^3.55.2"
   },
   "devDependencies": {
