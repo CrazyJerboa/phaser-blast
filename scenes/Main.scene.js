@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import {getRandomTileColor} from "../helpers/getRandomTileColor";
 import Tile from "../classes/Tile.class";
 import {fields} from "../enum/fields";
 import {gameOverReasons} from "../enum/gameOverReasons";
@@ -65,17 +64,14 @@ export default class MainScene extends Phaser.Scene {
     createNewTile(col, row, offset = -1) {
         const x = col * this.tileSize + this.tileSize / 2 + this.coordsOffset;
         let y = row * this.tileSize + this.tileSize / 2 + this.coordsOffset;
-        const color = getRandomTileColor();
         
         const data = {
             id: this.lastId,
-            type: 'tile',
-            color,
             row,
             col
         }
         
-        const tile = new Tile(this, x, y, color, 0, data).tile;
+        const tile = new Tile(this, x, y, data).tile;
         
         if (offset >= 0) {
             tile.y -= this.tileSize * offset;
@@ -233,22 +229,6 @@ export default class MainScene extends Phaser.Scene {
                 rows.push(i);
             }
 
-            const _moveTile = (tile, offset) => {
-                const currentRow = tile.getData('row');
-                tile.setData('row', currentRow + offset);
-                tile.setDepth(-(currentRow + offset) * 10);
-
-                this.tweens.add({
-                    targets: tile,
-                    y: tile.y + this.tileSize * offset,
-                    duration: 1000,
-                    ease: 'Bounce'
-                })
-                    .on('complete', () => {
-                        this.isAnimationActive = false;
-                    });
-            }
-
             let offset = 1;
             rows.forEach(row => {
                 if (row - 1 >= 0) {
@@ -257,7 +237,7 @@ export default class MainScene extends Phaser.Scene {
                         .find(t => t.getData('col') === col && t.getData('row') === row - 1);
 
                     if (aboveTile) {
-                        _moveTile(aboveTile, offset);
+                        aboveTile.emit('move', offset)
                     } else {
                         offset++;
                     }
